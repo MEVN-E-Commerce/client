@@ -5,6 +5,7 @@ const state = () => ({
   accessToken: null,
   authLoading: false,
   authError: null,
+  authInitialized: false,
 });
 
 const getters = {
@@ -32,6 +33,9 @@ const mutations = {
   },
   SET_AUTH_ERROR(state, error) {
     state.authError = error;
+  },
+  SET_AUTH_INITIALIZED(state, value) {
+    state.authInitialized = value;
   },
 };
 
@@ -104,6 +108,23 @@ const actions = {
     } catch (error) {
       commit('CLEAR_AUTH');
       throw error;
+    }
+  },
+
+  async initAuth({ dispatch, commit }) {
+    console.log('[Store Auth] initAuth started');
+    try {
+      await dispatch('refreshAccessToken');
+      console.log('[Store Auth] refreshAccessToken succeeded, fetching profile');
+      await dispatch('fetchProfile');
+      console.log('[Store Auth] fetchProfile succeeded');
+    } catch (error) {
+      console.log('[Store Auth] initAuth caught error (expected if logged out):', error.message || error);
+      // Quietly resolve for expected unauthenticated state
+      commit('CLEAR_AUTH');
+    } finally {
+      console.log('[Store Auth] setting authInitialized to true');
+      commit('SET_AUTH_INITIALIZED', true);
     }
   },
 };
