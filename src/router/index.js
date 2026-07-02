@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../views/customer/Home.vue';
+import store from '../store';
 
 const routes = [
   {
@@ -19,10 +20,20 @@ const router = createRouter({
   routes,
 });
 
-// TODO: Add Navigation Guards for Role-based Access Control (RBAC) later
-// router.beforeEach((to, from, next) => {
-//   // Check auth requirements
-//   next();
-// });
+// Navigation Guard for Role-based Access Control (RBAC) and Authentication
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = store.getters['auth/isAuthenticated'];
+  
+  // TODO: Example meta and role checks for protected routes:
+  // if (to.meta.requiresAuth && !isAuthenticated) {
+  //   return next({ name: 'Login' });
+  // }
+  // if (to.meta.role && store.getters['auth/currentUser']?.role !== to.meta.role) {
+  //   return next({ name: 'Home' }); // or access-denied view
+  //   // For example, role checks like store.getters['auth/isAdmin'] or store.getters['auth/isSeller']
+  // }
+  
+  next();
+});
 
 export default router;
