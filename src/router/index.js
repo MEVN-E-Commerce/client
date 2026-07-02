@@ -4,6 +4,10 @@ import Login from '../views/auth/Login.vue';
 import Register from '../views/auth/Register.vue';
 import VerifyEmail from '../views/auth/VerifyEmail.vue';
 import Profile from '../views/customer/Profile.vue';
+import ProductList from '../views/customer/ProductList.vue';
+import ProductDetail from '../views/customer/ProductDetail.vue';
+import ProductManager from '../views/seller/ProductManager.vue';
+import CategoryManager from '../views/admin/CategoryManager.vue';
 import store from '../store';
 
 const routes = [
@@ -11,6 +15,11 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home,
+  },
+  {
+    path: '/products',
+    name: 'ProductList',
+    component: ProductList,
   },
   {
     path: '/login',
@@ -33,10 +42,23 @@ const routes = [
     component: Profile,
     meta: { requiresAuth: true },
   },
-  // TODO: Add route groups later:
-  // - Customer Routes (e.g. Products, Cart, Checkout, Orders)
-  // - Seller Routes (e.g. Seller Dashboard, Manage Products, Orders)
-  // - Admin Routes (e.g. Admin Dashboard, User Management, Site Settings)
+  {
+    path: '/products/:id',
+    name: 'ProductDetail',
+    component: ProductDetail,
+  },
+  {
+    path: '/seller/products',
+    name: 'ProductManager',
+    component: ProductManager,
+    meta: { requiresAuth: true, roles: ['seller', 'admin'] },
+  },
+  {
+    path: '/admin/categories',
+    name: 'CategoryManager',
+    component: CategoryManager,
+    meta: { requiresAuth: true, roles: ['admin'] },
+  },
 ];
 
 const router = createRouter({
@@ -60,6 +82,16 @@ router.beforeEach((to, from, next) => {
     if (!isAuthenticated) {
       console.log('[Router Guard] Protected route and not authenticated, redirecting to Login');
       return next({ name: 'Login' });
+    }
+    
+    // Role validation check
+    const requiredRoles = to.matched.find(record => record.meta.roles)?.meta.roles;
+    if (requiredRoles) {
+      const user = store.getters['auth/currentUser'];
+      if (!user || !requiredRoles.includes(user.role)) {
+        console.log('[Router Guard] Forbidden role check. Redirecting to Home.');
+        return next({ name: 'Home' });
+      }
     }
   }
   
