@@ -46,14 +46,24 @@ const router = createRouter({
 
 // Navigation Guard for Role-based Access Control (RBAC) and Authentication
 router.beforeEach((to, from, next) => {
+  const authInitialized = store.state.auth.authInitialized;
   const isAuthenticated = store.getters['auth/isAuthenticated'];
+  console.log('[Router Guard]', { path: to.path, authInitialized, isAuthenticated });
+  
+  // Safety guard: if auth hasn't initialized yet, allow navigation
+  if (!authInitialized) {
+    console.log('[Router Guard] Auth not initialized, passing through');
+    return next();
+  }
   
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!isAuthenticated) {
+      console.log('[Router Guard] Protected route and not authenticated, redirecting to Login');
       return next({ name: 'Login' });
     }
   }
   
+  console.log('[Router Guard] Proceeding to route');
   next();
 });
 
