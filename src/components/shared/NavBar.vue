@@ -19,20 +19,42 @@
             Home
           </router-link>
           
-          <!-- Placeholders for future Auth Phase -->
-          <span 
-            class="px-3.5 py-2 rounded-xl text-sm font-medium text-slate-655 text-slate-500 cursor-not-allowed select-none hover:text-slate-400/80 transition duration-200"
-            title="Authentication implementation coming soon"
-          >
-            Login
-          </span>
-          
-          <span 
-            class="px-3.5 py-2 rounded-xl text-sm font-medium text-slate-500 cursor-not-allowed select-none hover:text-slate-400/80 transition duration-200"
-            title="Authentication implementation coming soon"
-          >
-            Register
-          </span>
+          <!-- Conditional Authentication Links -->
+          <template v-if="!isAuthenticated">
+            <router-link 
+              to="/login" 
+              class="px-3.5 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition duration-200"
+              active-class="bg-slate-850 text-emerald-400 font-semibold"
+            >
+              Login
+            </router-link>
+            
+            <router-link 
+              to="/register" 
+              class="px-3.5 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition duration-200"
+              active-class="bg-slate-850 text-emerald-400 font-semibold"
+            >
+              Register
+            </router-link>
+          </template>
+
+          <template v-else>
+            <router-link 
+              to="/profile" 
+              class="px-3.5 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition duration-200 flex items-center space-x-1"
+              active-class="bg-slate-850 text-emerald-400 font-semibold"
+            >
+              <span>Profile</span>
+              <span v-if="currentUser" class="text-xs text-slate-400 font-normal">({{ currentUser.name }})</span>
+            </router-link>
+
+            <button 
+              @click="handleLogout" 
+              class="px-3.5 py-2 rounded-xl text-sm font-medium text-rose-450 hover:text-rose-400 hover:bg-rose-500/10 cursor-pointer transition duration-200"
+            >
+              Logout
+            </button>
+          </template>
         </div>
       </div>
     </div>
@@ -40,5 +62,22 @@
 </template>
 
 <script setup>
-// Main navigation component logic
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+
+const store = useStore();
+const router = useRouter();
+
+const isAuthenticated = computed(() => store.getters['auth/isAuthenticated']);
+const currentUser = computed(() => store.getters['auth/currentUser']);
+
+const handleLogout = async () => {
+  try {
+    await store.dispatch('auth/logout');
+    router.push('/');
+  } catch (err) {
+    console.error('Logout failed:', err);
+  }
+};
 </script>
