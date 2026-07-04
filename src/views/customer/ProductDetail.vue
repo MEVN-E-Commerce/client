@@ -65,6 +65,29 @@ const getStars = (rating = 0) => {
   return Array.from({ length: 5 }, (_, index) => index < rounded);
 };
 
+const cartLoading = ref(false);
+const addedToCart = ref(false);
+
+const handleAddToCart = async () => {
+  if (!product.value || product.value.stock <= 0) return;
+  
+  cartLoading.value = true;
+  try {
+    await store.dispatch("cart/addItem", {
+      productId: product.value._id,
+      quantity: 1
+    });
+    addedToCart.value = true;
+    setTimeout(() => {
+      addedToCart.value = false;
+    }, 2000);
+  } catch (err) {
+    alert(err.response?.data?.message || "Failed to add product to cart.");
+  } finally {
+    cartLoading.value = false;
+  }
+};
+
 onMounted(() => {
   loadProduct();
 });
@@ -273,19 +296,22 @@ onMounted(() => {
           </div>
 
           <button
+            @click="handleAddToCart"
             class="w-full inline-flex items-center justify-center space-x-2 py-4 bg-linear-to-r from-emerald-500 to-cyan-500 text-slate-950 font-extrabold text-center rounded-2xl shadow-xl shadow-cyan-500/10 hover:shadow-cyan-500/20 active:scale-98 transition duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-            :disabled="product.stock <= 0"
+            :disabled="product.stock <= 0 || cartLoading"
           >
-            <ShoppingBag class="h-4 w-4" />
+            <span v-if="cartLoading" class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-955"></span>
+            <ShoppingBag v-else class="h-4 w-4" />
             <span>{{
-              product.stock > 0 ? "Add to Cart" : "Out of Stock"
+              product.stock <= 0
+                ? "Out of Stock"
+                : cartLoading
+                ? "Adding..."
+                : addedToCart
+                ? "Added to Cart! ✓"
+                : "Add to Cart"
             }}</span>
           </button>
-
-          <p class="text-[11px] text-slate-500 text-center mt-3">
-            Directly ready to purchase. Cart/Checkout implementation will follow
-            in next updates.
-          </p>
         </div>
       </div>
     </div>

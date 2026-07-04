@@ -20,6 +20,12 @@ api.interceptors.request.use(
     const token = store?.state.auth?.accessToken;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      // Attach guestSessionId on cart/orders calls if not authenticated
+      const guestSessionId = localStorage.getItem('guestSessionId');
+      if (guestSessionId && (config.url.includes('/cart') || config.url.includes('/orders'))) {
+        config.headers['X-Guest-Session-Id'] = guestSessionId;
+      }
     }
     return config;
   },
@@ -28,7 +34,14 @@ api.interceptors.request.use(
 
 // RESPONSE Interceptor: Handle token expiration (401) and run rotation
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Store X-Guest-Session-Id if returned by backend
+    const guestSessionHeader = response.headers['x-guest-session-id'] || response.headers['X-Guest-Session-Id'];
+    if (guestSessionHeader) {
+      localStorage.setItem('guestSessionId', guestSessionHeader);
+    }
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
     

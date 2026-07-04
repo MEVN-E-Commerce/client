@@ -19,6 +19,14 @@ const handleLogin = async () => {
       email: email.value,
       password: password.value,
     });
+    
+    // Merge guest cart items into authenticated user cart
+    try {
+      await store.dispatch('cart/mergeCart');
+    } catch (cartErr) {
+      console.error('Failed to merge guest cart on login:', cartErr);
+    }
+    
     router.push('/profile');
   } catch (err) {
     console.error('Login failed:', err);
