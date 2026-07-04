@@ -6,6 +6,7 @@ import { Users, Package2, ShoppingBag, Tags, TrendingUp, DollarSign, XCircle, Cl
 import StatCard from '../../components/admin/StatCard.vue';
 import StatusBadge from '../../components/admin/StatusBadge.vue';
 import LoadingSpinner from '../../components/admin/LoadingSpinner.vue';
+import AdminCharts from '../../components/admin/AdminCharts.vue';
 
 const store = useStore();
 const router = useRouter();
@@ -48,6 +49,9 @@ const topProducts = computed(() => stats.value?.topProducts || []);
         <StatCard label="Pending Orders" :value="fmt(stats.orders?.pending)" :icon="Clock" color="amber" />
         <StatCard label="Cancelled Orders" :value="fmt(stats.orders?.cancelled)" :icon="XCircle" color="rose" />
       </div>
+
+      <!-- Analytics Charts -->
+      <AdminCharts :stats="stats" />
 
       <!-- Order status breakdown -->
       <div class="bg-slate-900 rounded-2xl border border-slate-800/60 p-5 mb-6">
