@@ -8,6 +8,12 @@ import ProductList from '../views/customer/ProductList.vue';
 import ProductDetail from '../views/customer/ProductDetail.vue';
 import ProductManager from '../views/seller/ProductManager.vue';
 import CategoryManager from '../views/admin/CategoryManager.vue';
+import Cart from '../views/customer/Cart.vue';
+import Checkout from '../views/customer/Checkout.vue';
+import OrderConfirmation from '../views/customer/OrderConfirmation.vue';
+import OrderCancel from '../views/customer/OrderCancel.vue';
+import OrderHistory from '../views/customer/OrderHistory.vue';
+import OrderTracking from '../views/customer/OrderTracking.vue';
 import store from '../store';
 
 const routes = [
@@ -58,6 +64,48 @@ const routes = [
     name: 'CategoryManager',
     component: CategoryManager,
     meta: { requiresAuth: true, roles: ['admin'] },
+  },
+  {
+    path: '/cart',
+    name: 'Cart',
+    component: Cart,
+  },
+  {
+    path: '/checkout',
+    name: 'Checkout',
+    component: Checkout,
+  },
+  {
+    path: '/checkout/success',
+    name: 'CheckoutSuccess',
+    component: OrderConfirmation,
+  },
+  {
+    path: '/checkout/cancel',
+    name: 'CheckoutCancel',
+    component: OrderCancel,
+  },
+  {
+    path: '/order-confirmation',
+    name: 'OrderConfirmation',
+    component: OrderConfirmation,
+  },
+  {
+    path: '/orders',
+    name: 'OrderHistory',
+    component: OrderHistory,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/orders/:id',
+    name: 'OrderTracking',
+    component: OrderTracking,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/track/:id',
+    name: 'GuestOrderTracking',
+    component: OrderTracking,
   },
 ];
 

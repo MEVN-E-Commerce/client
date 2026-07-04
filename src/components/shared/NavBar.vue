@@ -32,6 +32,21 @@
             <span>Products</span>
           </router-link>
 
+          <router-link
+            to="/cart"
+            class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition duration-200 relative"
+            active-class="bg-slate-850 text-emerald-400 font-semibold"
+          >
+            <ShoppingCart class="h-4 w-4" />
+            <span>Cart</span>
+            <span
+              v-if="cartCount > 0"
+              class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-slate-950 shadow-[0_0_10px_rgba(16,185,129,0.4)]"
+            >
+              {{ cartCount }}
+            </span>
+          </router-link>
+
           <template v-if="!isAuthenticated">
             <router-link
               to="/login"
@@ -102,7 +117,7 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import {
@@ -111,6 +126,7 @@ import {
   LogOut,
   Package2,
   ShoppingBag,
+  ShoppingCart,
   Tags,
   UserCircle2,
   UserPlus,
@@ -125,6 +141,7 @@ const isSellerOrAdmin = computed(
   () => store.getters["auth/isSeller"] || store.getters["auth/isAdmin"],
 );
 const isAdmin = computed(() => store.getters["auth/isAdmin"]);
+const cartCount = computed(() => store.getters["cart/cartCount"]);
 
 const handleLogout = async () => {
   try {
@@ -134,4 +151,10 @@ const handleLogout = async () => {
     console.error("Logout failed:", err);
   }
 };
+
+onMounted(() => {
+  store.dispatch("cart/fetchCart").catch((err) => {
+    console.error("Failed to fetch cart on NavBar mount:", err);
+  });
+});
 </script>
