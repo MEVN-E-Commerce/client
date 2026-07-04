@@ -1,7 +1,8 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { getHealth } from '../../api/health';
+import { getPublicBanners } from '../../api/products';
 
 const router = useRouter();
 
@@ -10,6 +11,11 @@ const apiStatus = ref(null);
 const apiTimestamp = ref(null);
 const apiLoading = ref(true);
 const apiError = ref(null);
+
+// Banners Carousel state
+const banners = ref([]);
+const currentSlide = ref(0);
+const autoplayTimer = ref(null);
 
 const checkHealth = async () => {
   apiLoading.value = true;
@@ -25,17 +31,131 @@ const checkHealth = async () => {
   }
 };
 
+const loadBanners = async () => {
+  try {
+    const data = await getPublicBanners();
+    banners.value = data.banners || [];
+    startAutoplay();
+  } catch (err) {
+    console.error('Failed to load homepage banners:', err);
+  }
+};
+
+const startAutoplay = () => {
+  stopAutoplay();
+  if (banners.value.length > 1) {
+    autoplayTimer.value = setInterval(() => {
+      currentSlide.value = (currentSlide.value + 1) % banners.value.length;
+    }, 5000);
+  }
+};
+
+const stopAutoplay = () => {
+  if (autoplayTimer.value) clearInterval(autoplayTimer.value);
+};
+
+const setSlide = (idx) => {
+  currentSlide.value = idx;
+  startAutoplay(); // Reset timer on manual click
+};
+
+const prevSlide = () => {
+  currentSlide.value = currentSlide.value === 0 ? banners.value.length - 1 : currentSlide.value - 1;
+  startAutoplay();
+};
+
+const nextSlide = () => {
+  currentSlide.value = (currentSlide.value + 1) % banners.value.length;
+  startAutoplay();
+};
+
 const goToCatalog = () => {
   router.push('/products');
 };
 
 onMounted(() => {
   checkHealth();
+  loadBanners();
+});
+
+onUnmounted(() => {
+  stopAutoplay();
 });
 </script>
 
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
+    
+    <!-- Banners Carousel -->
+    <div v-if="banners.length" class="relative group h-[280px] sm:h-[400px] overflow-hidden rounded-[30px] border border-slate-800 shadow-2xl">
+      <!-- Slides -->
+      <div class="w-full h-full relative">
+        <div 
+          v-for="(banner, idx) in banners" 
+          :key="banner._id"
+          class="absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out"
+          :class="idx === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'"
+        >
+          <!-- Image -->
+          <img :src="banner.image" :alt="banner.title" class="w-full h-full object-cover" />
+          
+          <!-- Content Overlay (Glassmorphism) -->
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent flex flex-col justify-end p-6 sm:p-12">
+            <div class="max-w-2xl space-y-2 sm:space-y-4">
+              <h2 class="text-2xl sm:text-4xl font-black text-white leading-tight drop-shadow-md">
+                {{ banner.title }}
+              </h2>
+              <p v-if="banner.subtitle" class="text-sm sm:text-base text-slate-350 font-medium leading-relaxed drop-shadow-sm line-clamp-2">
+                {{ banner.subtitle }}
+              </p>
+              <div class="pt-2">
+                <router-link
+                  v-if="banner.link"
+                  :to="banner.link"
+                  class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:opacity-90 active:scale-95 text-white font-bold rounded-xl text-xs sm:text-sm transition duration-200"
+                >
+                  <span>Explore Now</span>
+                  <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </router-link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Arrows -->
+      <button 
+        v-if="banners.length > 1"
+        @click="prevSlide"
+        class="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-slate-900/60 hover:bg-slate-900/95 text-white border border-slate-750 opacity-0 group-hover:opacity-100 transition duration-300 cursor-pointer"
+      >
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <button 
+        v-if="banners.length > 1"
+        @click="nextSlide"
+        class="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-slate-900/60 hover:bg-slate-900/95 text-white border border-slate-750 opacity-0 group-hover:opacity-100 transition duration-300 cursor-pointer"
+      >
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+
+      <!-- Dot Indicators -->
+      <div v-if="banners.length > 1" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+        <button
+          v-for="(_, idx) in banners"
+          :key="idx"
+          @click="setSlide(idx)"
+          class="h-2 rounded-full transition-all duration-300 cursor-pointer"
+          :class="idx === currentSlide ? 'w-6 bg-violet-400' : 'w-2 bg-white/40 hover:bg-white/60'"
+        />
+      </div>
+    </div>
     
     <!-- Hero Block -->
     <div class="relative bg-slate-900 border border-slate-800 rounded-[35px] p-8 md:p-16 overflow-hidden shadow-2xl">

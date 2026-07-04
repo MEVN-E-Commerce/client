@@ -27,7 +27,12 @@ const handleLogin = async () => {
       console.error('Failed to merge guest cart on login:', cartErr);
     }
     
-    router.push('/profile');
+    const user = store.getters['auth/currentUser'];
+    if (user && user.role === 'admin') {
+      router.push('/admin');
+    } else {
+      router.push('/profile');
+    }
   } catch (err) {
     console.error('Login failed:', err);
   }
