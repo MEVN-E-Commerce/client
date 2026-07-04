@@ -340,7 +340,7 @@ const handleUpdateProfile = async () => {
 <template>
   <div style="max-width: 1200px; margin: 20px auto; padding: 20px; font-family: sans-serif; background: #0f172a; color: #f8fafc; border-radius: 8px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-      <h1 style="margin: 0;">Seller Portal: {{ profile?.storeName || 'My Shop' }}</h1>
+      <h1 style="margin: 0;">Seller Portal: {{ (profile && profile.storeName) || 'My Shop' }}</h1>
       <router-link
         to="/seller/products"
         style="padding: 8px 16px; background: #3b82f6; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold; transition: background 0.2s;"
@@ -377,23 +377,23 @@ const handleUpdateProfile = async () => {
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
           <div style="background: #1e293b; padding: 20px; border-radius: 6px; border-left: 4px solid #10b981;">
             <div style="font-size: 0.875rem; color: #94a3b8;">Total Sales</div>
-            <div style="font-size: 1.5rem; font-weight: bold; margin-top: 5px;">${{ stats?.totalSales || 0 }}</div>
+            <div style="font-size: 1.5rem; font-weight: bold; margin-top: 5px;">${{ (stats && stats.totalSales) || 0 }}</div>
           </div>
           <div style="background: #1e293b; padding: 20px; border-radius: 6px; border-left: 4px solid #3b82f6;">
             <div style="font-size: 0.875rem; color: #94a3b8;">Total Orders</div>
-            <div style="font-size: 1.5rem; font-weight: bold; margin-top: 5px;">{{ stats?.totalOrders || 0 }}</div>
+            <div style="font-size: 1.5rem; font-weight: bold; margin-top: 5px;">{{ (stats && stats.totalOrders) || 0 }}</div>
           </div>
           <div style="background: #1e293b; padding: 20px; border-radius: 6px; border-left: 4px solid #8b5cf6;">
             <div style="font-size: 0.875rem; color: #94a3b8;">Listed Products</div>
-            <div style="font-size: 1.5rem; font-weight: bold; margin-top: 5px;">{{ stats?.totalProducts || 0 }}</div>
+            <div style="font-size: 1.5rem; font-weight: bold; margin-top: 5px;">{{ (stats && stats.totalProducts) || 0 }}</div>
           </div>
           <div style="background: #1e293b; padding: 20px; border-radius: 6px; border-left: 4px solid #ef4444;">
             <div style="font-size: 0.875rem; color: #94a3b8;">Low Stock Alert</div>
-            <div style="font-size: 1.5rem; font-weight: bold; margin-top: 5px;">{{ stats?.lowStockCount || 0 }}</div>
+            <div style="font-size: 1.5rem; font-weight: bold; margin-top: 5px;">{{ (stats && stats.lowStockCount) || 0 }}</div>
           </div>
         </div>
 
-        <div v-if="stats?.lowStockProducts?.length > 0" style="background: #7f1d1d; padding: 15px; border-radius: 6px;">
+        <div v-if="stats && stats.lowStockProducts && stats.lowStockProducts.length > 0" style="background: #7f1d1d; padding: 15px; border-radius: 6px;">
           <h3>⚠️ Low Stock Alert (5 items or less)</h3>
           <ul>
             <li v-for="p in stats.lowStockProducts" :key="p._id">
