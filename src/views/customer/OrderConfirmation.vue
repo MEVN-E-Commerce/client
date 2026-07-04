@@ -21,7 +21,7 @@
       </div>
 
       <p class="text-xs text-slate-500 max-w-sm mx-auto">
-        A confirmation email containing your full order details and receipt has been queued for your inbox.
+        A confirmation email containing your full order details and receipt has been sent to your inbox.
       </p>
 
       <!-- Action buttons -->

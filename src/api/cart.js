@@ -55,6 +55,7 @@ export async function clearCart() {
  * @returns {Promise<Object>}
  */
 export async function mergeCart() {
-  const response = await api.post('/cart/merge');
+  const guestSessionId = localStorage.getItem('guestSessionId') || undefined;
+  const response = await api.post('/cart/merge', { guestSessionId });
   return response.data;
 }

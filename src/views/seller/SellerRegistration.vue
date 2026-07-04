@@ -11,7 +11,12 @@ const storeName = ref('');
 const description = ref('');
 const phone = ref('');
 const address = ref('');
-const payoutInfo = ref('');
+
+// Structured Payout details
+const payoutMethod = ref('bank');
+const bankDetails = ref({ bankName: '', holderName: '', accountNumber: '', iban: '', swift: '' });
+const paypalDetails = ref({ email: '' });
+const cardDetails = ref({ holderName: '', last4: '', expMonth: '', expYear: '' });
 
 const error = ref('');
 const success = ref('');
@@ -24,19 +29,27 @@ const handleSubmit = async () => {
   success.value = '';
   loading.value = true;
 
+  const payoutInfoObj = {
+    method: payoutMethod.value,
+    bank: payoutMethod.value === 'bank' ? bankDetails.value : undefined,
+    paypal: payoutMethod.value === 'paypal' ? paypalDetails.value : undefined,
+    card: payoutMethod.value === 'card' ? cardDetails.value : undefined
+  };
+
   try {
     const res = await registerSeller({
       storeName: storeName.value,
       description: description.value,
       phone: phone.value,
       address: address.value,
-      payoutInfo: payoutInfo.value
+      payoutInfo: payoutInfoObj
     });
 
     if (res.success) {
       success.value = res.message || 'Seller registration submitted successfully!';
-      // Refresh current user state
-      await store.dispatch('auth/getProfile');
+      // Refresh current user state and token to get the new role
+      await store.dispatch('auth/refreshAccessToken');
+      await store.dispatch('auth/fetchProfile');
       setTimeout(() => {
         router.push('/seller/dashboard');
       }, 2000);
@@ -86,9 +99,71 @@ const handleSubmit = async () => {
         <input v-model="address" type="text" style="width: 100%; padding: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; border-radius: 4px;" />
       </div>
 
-      <div style="margin-bottom: 15px;">
-        <label style="display: block; margin-bottom: 5px;">Payout Info (e.g. Bank Account / PayPal)</label>
-        <input v-model="payoutInfo" type="text" style="width: 100%; padding: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; border-radius: 4px;" />
+      <div style="margin-bottom: 20px; padding: 15px; background: #0f172a; border: 1px solid #334155; border-radius: 6px;">
+        <h4 style="margin-top: 0; margin-bottom: 10px; color: #10b981;">Payout Details Setup</h4>
+        
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px;">Preferred Payout Method *</label>
+          <select v-model="payoutMethod" style="width: 100%; padding: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; border-radius: 4px;">
+            <option value="bank">Direct Bank Transfer</option>
+            <option value="paypal">PayPal</option>
+            <option value="card">Debit/Credit Card</option>
+          </select>
+        </div>
+
+        <!-- Bank Account Section -->
+        <div v-if="payoutMethod === 'bank'" style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+          <div>
+            <label style="display: block; font-size: 0.85em; margin-bottom: 3px;">Bank Name *</label>
+            <input v-model="bankDetails.bankName" type="text" placeholder="e.g. Chase" style="width: 100%; padding: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; border-radius: 4px;" />
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.85em; margin-bottom: 3px;">Account Holder Name *</label>
+            <input v-model="bankDetails.holderName" type="text" placeholder="e.g. John Doe" style="width: 100%; padding: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; border-radius: 4px;" />
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.85em; margin-bottom: 3px;">Account Number / Routing *</label>
+            <input v-model="bankDetails.accountNumber" type="text" placeholder="e.g. 1234567890" style="width: 100%; padding: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; border-radius: 4px;" />
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <label style="display: block; font-size: 0.85em; margin-bottom: 3px;">IBAN (Optional)</label>
+              <input v-model="bankDetails.iban" type="text" placeholder="EG..." style="width: 100%; padding: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; border-radius: 4px;" />
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.85em; margin-bottom: 3px;">SWIFT Code (Optional)</label>
+              <input v-model="bankDetails.swift" type="text" placeholder="e.g. CHASUS33" style="width: 100%; padding: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; border-radius: 4px;" />
+            </div>
+          </div>
+        </div>
+
+        <!-- PayPal Section -->
+        <div v-if="payoutMethod === 'paypal'">
+          <label style="display: block; font-size: 0.85em; margin-bottom: 3px;">PayPal Email Address *</label>
+          <input v-model="paypalDetails.email" type="email" placeholder="e.g. billing@mybrand.com" style="width: 100%; padding: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; border-radius: 4px;" />
+        </div>
+
+        <!-- Card Section -->
+        <div v-if="payoutMethod === 'card'" style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+          <div>
+            <label style="display: block; font-size: 0.85em; margin-bottom: 3px;">Card Holder Name *</label>
+            <input v-model="cardDetails.holderName" type="text" placeholder="e.g. John Doe" style="width: 100%; padding: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; border-radius: 4px;" />
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.85em; margin-bottom: 3px;">Last 4 Digits of Card *</label>
+            <input v-model="cardDetails.last4" type="text" maxlength="4" placeholder="e.g. 4321" style="width: 100%; padding: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; border-radius: 4px;" />
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <label style="display: block; font-size: 0.85em; margin-bottom: 3px;">Expiration Month *</label>
+              <input v-model="cardDetails.expMonth" type="text" placeholder="MM" style="width: 100%; padding: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; border-radius: 4px;" />
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.85em; margin-bottom: 3px;">Expiration Year *</label>
+              <input v-model="cardDetails.expYear" type="text" placeholder="YYYY" style="width: 100%; padding: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; border-radius: 4px;" />
+            </div>
+          </div>
+        </div>
       </div>
 
       <button type="submit" :disabled="loading" style="padding: 10px 20px; background: #10b981; color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">

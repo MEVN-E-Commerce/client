@@ -216,7 +216,7 @@ const triggerUndo = () => {
       <div v-if="lastAction" class="fixed bottom-6 right-6 z-50 bg-slate-900 border border-violet-500/35 text-slate-100 px-5 py-4 rounded-2xl shadow-2xl flex items-center gap-4 max-w-sm">
         <div class="flex-1">
           <p class="text-sm font-semibold text-slate-200">Status Changed Successfully</p>
-          <p class="text-xs text-slate-400 mt-0.5">"${lastAction.sellerName}" is now marked as {{ lastAction.targetStatus }}.</p>
+          <p class="text-xs text-slate-400 mt-0.5">"{{ lastAction.sellerName }}" is now marked as {{ lastAction.targetStatus }}.</p>
         </div>
         <button 
           @click="triggerUndo" 
