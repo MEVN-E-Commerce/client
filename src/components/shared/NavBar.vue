@@ -6,7 +6,7 @@
       <div class="flex items-center justify-between h-16">
         <div class="flex items-center">
           <router-link
-            to="/"
+            :to="isAdmin ? '/admin' : '/'"
             class="flex items-center space-x-2 text-xl font-bold bg-linear-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent transition duration-200 hover:opacity-90"
           >
             <span>MEVN Market</span>
@@ -15,6 +15,7 @@
 
         <div class="flex items-center space-x-1.5 sm:space-x-2">
           <router-link
+            v-if="!isAdmin"
             to="/"
             class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition duration-200"
             active-class="bg-slate-850 text-emerald-400 font-semibold"
@@ -24,6 +25,7 @@
           </router-link>
 
           <router-link
+            v-if="!isAdmin"
             to="/products"
             class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition duration-200"
             active-class="bg-slate-850 text-emerald-400 font-semibold"
@@ -32,7 +34,9 @@
             <span>Products</span>
           </router-link>
 
+          <!-- Cart link (hide for admin) -->
           <router-link
+            v-if="!isAdmin"
             to="/cart"
             class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition duration-200 relative"
             active-class="bg-slate-850 text-emerald-400 font-semibold"
@@ -47,6 +51,7 @@
             </span>
           </router-link>
 
+          <!-- Guest actions -->
           <template v-if="!isAuthenticated">
             <router-link
               to="/login"
@@ -67,9 +72,11 @@
             </router-link>
           </template>
 
+          <!-- Authenticated actions -->
           <template v-else>
+            <!-- Seller link -->
             <router-link
-              v-if="isSellerOrAdmin"
+              v-if="isSeller"
               to="/seller/products"
               class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition duration-200"
               active-class="bg-slate-850 text-emerald-400 font-semibold"
@@ -78,17 +85,20 @@
               <span>Manage Products</span>
             </router-link>
 
+            <!-- Admin dashboard panel link -->
             <router-link
               v-if="isAdmin"
-              to="/admin/categories"
-              class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition duration-200"
-              active-class="bg-slate-850 text-emerald-400 font-semibold"
+              to="/admin"
+              class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-sm font-medium text-violet-400 hover:text-violet-300 hover:bg-violet-500/10 transition duration-200"
+              active-class="bg-violet-500/20 text-violet-300 font-semibold border border-violet-500/30"
             >
-              <Tags class="h-4 w-4" />
-              <span>Manage Categories</span>
+              <ShieldCheck class="h-4 w-4" />
+              <span>Admin Panel</span>
             </router-link>
 
+            <!-- Profile (hide for admin) -->
             <router-link
+              v-if="!isAdmin"
               to="/profile"
               class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition duration-200"
               active-class="bg-slate-850 text-emerald-400 font-semibold"
@@ -102,6 +112,13 @@
               >
             </router-link>
 
+            <!-- Admin Display Name -->
+            <div v-if="isAdmin && currentUser" class="flex items-center space-x-1 px-3 py-2 text-sm text-slate-400">
+              <UserCircle2 class="h-4 w-4 text-slate-500" />
+              <span>{{ currentUser.name }}</span>
+            </div>
+
+            <!-- Logout -->
             <button
               @click="handleLogout"
               class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-sm font-medium text-rose-450 hover:text-rose-400 hover:bg-rose-500/10 cursor-pointer transition duration-200"
@@ -130,6 +147,7 @@ import {
   Tags,
   UserCircle2,
   UserPlus,
+  ShieldCheck
 } from "lucide-vue-next";
 
 const store = useStore();
@@ -140,6 +158,7 @@ const currentUser = computed(() => store.getters["auth/currentUser"]);
 const isSellerOrAdmin = computed(
   () => store.getters["auth/isSeller"] || store.getters["auth/isAdmin"],
 );
+const isSeller = computed(() => store.getters["auth/isSeller"]);
 const isAdmin = computed(() => store.getters["auth/isAdmin"]);
 const cartCount = computed(() => store.getters["cart/cartCount"]);
 
