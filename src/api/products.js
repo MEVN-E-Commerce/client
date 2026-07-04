@@ -114,3 +114,12 @@ export async function deleteCategory(id) {
   const response = await api.delete(`/categories/${id}`);
   return response.data;
 }
+
+/**
+ * Get all active banners (Public)
+ * @returns {Promise<Object>} - { success: true, banners: Array }
+ */
+export async function getPublicBanners() {
+  const response = await api.get('/banners');
+  return response.data;
+}

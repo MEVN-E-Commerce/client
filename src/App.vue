@@ -1,12 +1,17 @@
 <script setup>
-import NavBar from './components/shared/NavBar.vue';
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import AdminLayout from './layouts/AdminLayout.vue';
+import CustomerLayout from './layouts/CustomerLayout.vue';
+
+const route = useRoute();
+const layout = computed(() =>
+  route.meta.layout === 'admin' ? AdminLayout : CustomerLayout
+);
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
-    <NavBar />
-    <main class="py-6">
-      <router-view />
-    </main>
-  </div>
+  <component :is="layout">
+    <!-- router-view is rendered inside the chosen layout -->
+  </component>
 </template>

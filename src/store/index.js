@@ -1,6 +1,7 @@
 import { createStore } from 'vuex';
 import auth from './modules/auth';
 import cart from './modules/cart';
+import admin from './modules/admin';
 
 export default createStore({
   state() {
@@ -11,8 +12,7 @@ export default createStore({
   modules: {
     auth,
     cart,
-    // TODO: Add store modules in subsequent phases:
-    // products,
-    // orders
+    admin
   }
 });
+
