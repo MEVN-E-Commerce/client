@@ -74,15 +74,26 @@
 
           <!-- Authenticated actions -->
           <template v-else>
-            <!-- Seller link -->
+            <!-- Seller Dashboard link -->
             <router-link
               v-if="isSeller"
-              to="/seller/products"
+              to="/seller/dashboard"
               class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition duration-200"
               active-class="bg-slate-850 text-emerald-400 font-semibold"
             >
               <Package2 class="h-4 w-4" />
-              <span>Manage Products</span>
+              <span>Seller Dashboard</span>
+            </router-link>
+
+            <!-- Become Seller link -->
+            <router-link
+              v-if="!isSeller && !isAdmin"
+              to="/seller/register"
+              class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition duration-200"
+              active-class="bg-slate-850 text-emerald-400 font-semibold"
+            >
+              <UserPlus class="h-4 w-4" />
+              <span>Become Seller</span>
             </router-link>
 
             <!-- Admin dashboard panel link -->

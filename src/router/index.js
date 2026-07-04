@@ -13,6 +13,8 @@ import OrderConfirmation from '../views/customer/OrderConfirmation.vue';
 import OrderCancel from '../views/customer/OrderCancel.vue';
 import OrderHistory from '../views/customer/OrderHistory.vue';
 import OrderTracking from '../views/customer/OrderTracking.vue';
+import SellerRegistration from '../views/seller/SellerRegistration.vue';
+import SellerDashboard from '../views/seller/SellerDashboard.vue';
 
 // ─── Admin views ───────────────────────────────────────────────────────────
 import AdminDashboard from '../views/admin/AdminDashboard.vue';
@@ -39,6 +41,8 @@ const routes = [
   { path: '/register', name: 'Register', component: Register },
   { path: '/verify-email/:token', name: 'VerifyEmail', component: VerifyEmail },
   { path: '/profile', name: 'Profile', component: Profile, meta: { requiresAuth: true } },
+  { path: '/seller/register', name: 'SellerRegistration', component: SellerRegistration, meta: { requiresAuth: true } },
+  { path: '/seller/dashboard', name: 'SellerDashboard', component: SellerDashboard, meta: { requiresAuth: true, roles: ['seller', 'admin'] } },
   { path: '/seller/products', name: 'ProductManager', component: ProductManager, meta: { requiresAuth: true, roles: ['seller', 'admin'] } },
   { path: '/cart', name: 'Cart', component: Cart },
   { path: '/checkout', name: 'Checkout', component: Checkout },
