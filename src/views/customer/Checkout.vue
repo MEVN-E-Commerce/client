@@ -176,12 +176,12 @@
 
         <!-- Items list -->
         <div class="divide-y divide-slate-850 max-h-80 overflow-y-auto pr-1">
-          <div v-for="item in cartItems" :key="item.productId?._id" class="flex items-center justify-between py-3">
+          <div v-for="(item, index) in cartItems" :key="item.productId && item.productId._id || index" class="flex items-center justify-between py-3">
             <div class="min-w-0 pr-3">
-              <p class="text-sm font-semibold text-white truncate">{{ item.productId?.name }}</p>
-              <p class="text-xs text-slate-400 mt-0.5">Qty: {{ item.quantity }} × ${{ formatPrice(item.priceAtAdd || item.productId?.price) }}</p>
+              <p class="text-sm font-semibold text-white truncate">{{ item.productId && item.productId.name }}</p>
+              <p class="text-xs text-slate-400 mt-0.5">Qty: {{ item.quantity }} × ${{ formatPrice(item.priceAtAdd || (item.productId && item.productId.price)) }}</p>
             </div>
-            <span class="text-sm font-bold text-white shrink-0">${{ formatPrice((item.priceAtAdd || item.productId?.price || 0) * item.quantity) }}</span>
+            <span class="text-sm font-bold text-white shrink-0">${{ formatPrice((item.priceAtAdd || (item.productId && item.productId.price) || 0) * item.quantity) }}</span>
           </div>
         </div>
 
